@@ -1,0 +1,93 @@
+"""
+Game controller for TicTacToe
+Manages game flow and coordinates between game logic, UI, and players
+"""
+
+from .game import TicTacToe
+from .ui import GameUI
+from .player import PlayerInput
+
+
+class GameController:
+    """Controls the game flow"""
+    
+    def __init__(self):
+        """Initialize game controller"""
+        self.game = TicTacToe()
+        self.num_human_players = 2
+    
+    def play_game(self):
+        """Main game loop"""
+        self.game.reset()
+        GameUI.display_positions()
+        
+        while True:
+            GameUI.display_board(self.game.board)
+            
+            # Determine if current player is human or computer
+            if self.game.current_player == 'X':
+                is_human = self.num_human_players >= 1
+            else:
+                is_human = self.num_human_players == 2
+            
+            # Get and make move
+            if is_human:
+                position = PlayerInput.get_human_move(
+                    self.game.current_player,
+                    self.game.is_valid_move
+                )
+                self.game.make_move(position)
+            else:
+                position = PlayerInput.get_computer_move(
+                    self.game.current_player,
+                    self.game.get_available_positions()
+                )
+                if position is not None:
+                    self.game.make_move(position)
+            
+            # Check for winner
+            winner = self.game.check_winner()
+            if winner:
+                GameUI.display_board(self.game.board)
+                GameUI.display_winner(winner)
+                break
+            
+            # Check for draw
+            if self.game.is_board_full():
+                GameUI.display_board(self.game.board)
+                GameUI.display_draw()
+                break
+            
+            # Switch to next player
+            self.game.switch_player()
+    
+    def run(self):
+        """Run the game application"""
+        GameUI.clear_screen()
+        GameUI.display_title()
+        
+        while True:
+            self.num_human_players = PlayerInput.get_player_mode()
+            GameUI.clear_screen()
+            GameUI.display_title()
+            
+            if self.num_human_players == 0:
+                print("\n  Starting Computer vs Computer game...")
+            elif self.num_human_players == 1:
+                print("\n  Starting Human vs Computer game...")
+                print("  You are Player X")
+            else:
+                print("\n  Starting Human vs Human game...")
+            
+            input("\n  Press Enter to start...")
+            GameUI.clear_screen()
+            
+            self.play_game()
+            
+            if not PlayerInput.play_again():
+                break
+            
+            GameUI.clear_screen()
+            GameUI.display_title()
+        
+        GameUI.display_goodbye()

@@ -9,7 +9,7 @@ import os
 # Add the parent directory to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from tictactoe import TicTacToe, GameController
+from tictactoe_package import TicTacToe, GameController
 
 
 def test_board_initialization():
