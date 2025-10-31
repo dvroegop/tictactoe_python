@@ -23,20 +23,20 @@ def test_board_initialization():
 def test_valid_move():
     """Test making valid moves"""
     game = TicTacToe()
-    assert game.make_move(0) == True, "Should allow move on empty position"
+    assert game.make_move(0), "Should allow move on empty position"
     assert game.board[0] == 'X', "Board should update with player's mark"
-    assert game.make_move(0) == False, "Should not allow move on occupied position"
+    assert not game.make_move(0), "Should not allow move on occupied position"
     print("✓ Valid move test passed")
 
 
 def test_is_valid_move():
     """Test move validation"""
     game = TicTacToe()
-    assert game.is_valid_move(0) == True, "Empty position should be valid"
+    assert game.is_valid_move(0), "Empty position should be valid"
     game.board[0] = 'X'
-    assert game.is_valid_move(0) == False, "Occupied position should be invalid"
-    assert game.is_valid_move(-1) == False, "Negative position should be invalid"
-    assert game.is_valid_move(9) == False, "Position > 8 should be invalid"
+    assert not game.is_valid_move(0), "Occupied position should be invalid"
+    assert not game.is_valid_move(-1), "Negative position should be invalid"
+    assert not game.is_valid_move(9), "Position > 8 should be invalid"
     print("✓ Move validation test passed")
 
 
@@ -111,9 +111,9 @@ def test_no_winner():
 def test_board_full():
     """Test board full detection"""
     game = TicTacToe()
-    assert game.is_board_full() == False, "Empty board should not be full"
+    assert not game.is_board_full(), "Empty board should not be full"
     game.board = ['X', 'O', 'X', 'O', 'X', 'X', 'O', 'X', 'O']
-    assert game.is_board_full() == True, "Full board should be detected"
+    assert game.is_board_full(), "Full board should be detected"
     print("✓ Board full detection test passed")
 
 

@@ -197,11 +197,11 @@ class GameController:
             # Get and make move
             if is_human:
                 position = self.get_human_move(self.game.current_player)
+                self.game.make_move(position)
             else:
                 position = self.get_computer_move(self.game.current_player)
-            
-            if position is not None:
-                self.game.make_move(position)
+                if position is not None:
+                    self.game.make_move(position)
             
             # Check for winner
             winner = self.game.check_winner()
