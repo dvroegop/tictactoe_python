@@ -3,9 +3,11 @@ Game controller for TicTacToe
 Manages game flow and coordinates between game logic, UI, and players
 """
 
+from typing import Optional
 from .game import TicTacToe
 from .ui import GameUI
 from .player import PlayerInput
+from .rl_agent import RLAgent
 
 
 class GameController:
@@ -15,6 +17,7 @@ class GameController:
         """Initialize game controller"""
         self.game = TicTacToe()
         self.num_human_players = 2
+        self._rl_agent: Optional[RLAgent] = None
     
     def play_game(self):
         """Main game loop"""
@@ -38,13 +41,38 @@ class GameController:
                 )
                 self.game.make_move(position)
             else:
-                position = PlayerInput.get_computer_move(
-                    self.game.current_player,
-                    self.game.get_available_positions()
-                )
+                # computer move
+                if PlayerInput._ai_kind == "rl":
+                    # Init once if chosen
+                    if self._rl_agent is None:
+                        self._rl_agent = RLAgent()
+                        try:
+                            self._rl_agent.load("q_table.json")
+                            print("  [AI] RL policy loaded.")
+                        except Exception:
+                            print("  [AI] No policy loaded; using random fallback.")
+                    # Let RL pick based on the actual board
+                    if self._rl_agent:
+                        position = self._rl_agent.pick_move(self.game.board)
+                        if position not in self.game.get_available_positions():
+                            # Safety: fallback
+                            position = PlayerInput.get_computer_move(
+                                self.game.current_player,
+                                self.game.get_available_positions()
+                            )
+                    else:
+                        position = PlayerInput.get_computer_move(
+                            self.game.current_player,
+                            self.game.get_available_positions()
+                        )
+                else:
+                    position = PlayerInput.get_computer_move(
+                        self.game.current_player,
+                        self.game.get_available_positions()
+                    )
                 if position is not None:
                     self.game.make_move(position)
-            
+                    
             # Check for winner
             winner = self.game.check_winner()
             if winner:
