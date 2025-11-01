@@ -64,7 +64,7 @@ Q-Learning is a **model-free reinforcement learning algorithm** that learns to m
 
 **Key Concepts:**
 
-- **State (S):** The current configuration of the game board (e.g., "X O  X   ")
+- **State (S):** The current configuration of the game board (e.g., "X O  X   " - a 9-character string)
 - **Action (A):** A move the agent can make (placing a mark in positions 0-8)
 - **Reward (R):** Feedback after an action (+1 for winning, -1 for losing, 0 for draw, -0.01 per move to encourage faster wins)
 - **Q-Value Q(S,A):** The expected future reward for taking action A in state S
@@ -132,7 +132,7 @@ If `q_table.json` doesn't exist, the AI will still play but with untrained (zero
 ### Why Q-Learning for Tic-Tac-Toe?
 
 Tic-Tac-Toe is an excellent learning environment because:
-- **Small state space:** Manageable for Q-table storage (~5,000-9,000 states after training)
+- **Small state space:** The trained Q-table contains ~3,000-4,000 unique states and ~7,000 state-action pairs, making it manageable for storage and analysis
 - **Clear rewards:** Win/lose/draw outcomes are unambiguous
 - **Fast training:** Games are quick, allowing thousands of training episodes
 - **Interpretable:** You can inspect the Q-table to understand what the agent learned
