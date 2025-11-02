@@ -95,10 +95,10 @@ class DQNAgent:
         s = encode_board(board, current_player).to(self.cfg.device).unsqueeze(0)  # (1,28)
         q = self.qnet(s).squeeze(0)  # (9,)
         # explain why
-        vals = q.cpu().numpy().tolist()
-        pairs = [(i, vals[i]) for i in range(9) if board[i] == ' ']
-        pairs.sort(key=lambda x: x[1], reverse=True)
-        print("  [Why] Top candidates:", ", ".join([f"{i+1}: {v:.3f}" for i, v in pairs[:3]]))
+        # vals = q.cpu().numpy().tolist()
+        # pairs = [(i, vals[i]) for i in range(9) if board[i] == ' ']
+        # pairs.sort(key=lambda x: x[1], reverse=True)
+        # print("  [Why] Top candidates:", ", ".join([f"{i+1}: {v:.3f}" for i, v in pairs[:3]]))
         # mask illegal moves by setting them to very low value
         q_masked = q.clone()
         q_masked[mask < 0.5] = -1e9
