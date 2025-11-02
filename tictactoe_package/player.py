@@ -27,8 +27,12 @@ class PlayerInput:
 
     @staticmethod
     def _ask_ai_kind() -> str:
-        raw = input("  Computer type: [R]andom or [L]earning (Q-Learning)? ").strip().lower()
-        return "rl" if raw.startswith("l") else "random"
+        raw = input("  Computer type: [R]andom or [L]earning (Q-Learning) or [D]eep Q-Learning? ").strip().lower()
+        if raw.startswith("r"):
+            return "random"
+        if raw.startswith("d"):
+            return "dq"
+        return "random"
 
     @staticmethod
     def _init_ai_if_needed():

@@ -8,6 +8,7 @@ from .game import TicTacToe
 from .ui import GameUI
 from .player import PlayerInput
 from .rl_agent import RLAgent
+from .dqn_agent import DQNAgent
 
 
 class GameController:
