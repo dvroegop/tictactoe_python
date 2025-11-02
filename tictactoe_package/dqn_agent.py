@@ -57,7 +57,7 @@ class DQNConfig:
     epsilon_end: float = 0.05
     epsilon_decay_steps: int = 5_000
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
-    verbose: bool = True                  # print move explanations
+    verbose: bool = True                  # print Q-value explanations during action selection
 
 @dataclass
 class DQNAgent:

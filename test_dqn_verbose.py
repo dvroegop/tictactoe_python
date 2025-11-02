@@ -104,7 +104,7 @@ def test_verbose_default_is_true():
     cfg = DQNConfig()
     
     # Verify that verbose is True by default
-    assert cfg.verbose == True, f"Expected verbose to default to True, got {cfg.verbose}"
+    assert cfg.verbose is True, f"Expected verbose to default to True, got {cfg.verbose}"
     
     print("  ✓ Default verbose value is True")
 
@@ -169,27 +169,33 @@ def test_multiple_moves_with_verbose():
     verbose_output_count = 0
     silent_output_count = 0
     
-    for i in range(3):
-        # Verbose agent
-        captured = StringIO()
-        sys.stdout = captured
-        agent_verbose.select_action(env.board, env.current_player, explore=False)
-        sys.stdout = sys.__stdout__
-        if "[Why]" in captured.getvalue():
-            verbose_output_count += 1
+    original_stdout = sys.stdout
+    
+    try:
+        for i in range(3):
+            # Verbose agent
+            captured = StringIO()
+            sys.stdout = captured
+            agent_verbose.select_action(env.board, env.current_player, explore=False)
+            sys.stdout = original_stdout
+            if "[Why]" in captured.getvalue():
+                verbose_output_count += 1
+            
+            # Silent agent
+            captured = StringIO()
+            sys.stdout = captured
+            agent_silent.select_action(env.board, env.current_player, explore=False)
+            sys.stdout = original_stdout
+            if "[Why]" in captured.getvalue():
+                silent_output_count += 1
         
-        # Silent agent
-        captured = StringIO()
-        sys.stdout = captured
-        agent_silent.select_action(env.board, env.current_player, explore=False)
-        sys.stdout = sys.__stdout__
-        if "[Why]" in captured.getvalue():
-            silent_output_count += 1
-    
-    assert verbose_output_count == 3, f"Expected 3 verbose outputs, got {verbose_output_count}"
-    assert silent_output_count == 0, f"Expected 0 verbose outputs, got {silent_output_count}"
-    
-    print("  ✓ Verbose setting works correctly across multiple moves")
+        assert verbose_output_count == 3, f"Expected 3 verbose outputs, got {verbose_output_count}"
+        assert silent_output_count == 0, f"Expected 0 verbose outputs, got {silent_output_count}"
+        
+        print("  ✓ Verbose setting works correctly across multiple moves")
+        
+    finally:
+        sys.stdout = original_stdout
 
 
 def run_all_tests():
