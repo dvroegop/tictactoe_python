@@ -19,6 +19,7 @@ class GameController:
         """Initialize game controller"""
         self.game = TicTacToe()
         self.num_human_players = 2
+        self.human_player_symbol = 'X'  # Track which symbol the human player uses
         self._rl_agent: Optional[RLAgent] = None
         self._dq_agent: Optional[DQNAgent] = None
     
@@ -31,10 +32,15 @@ class GameController:
             GameUI.display_board(self.game.board)
             
             # Determine if current player is human or computer
-            if self.game.current_player == 'X':
-                is_human = self.num_human_players >= 1
+            if self.num_human_players == 2:
+                # Both players are human
+                is_human = True
+            elif self.num_human_players == 1:
+                # One human player - check if current player matches human symbol
+                is_human = (self.game.current_player == self.human_player_symbol)
             else:
-                is_human = self.num_human_players == 2
+                # No human players
+                is_human = False
             
             # Get and make move
             if is_human:
@@ -122,8 +128,14 @@ class GameController:
             if self.num_human_players == 0:
                 print("\n  Starting Computer vs Computer game...")
             elif self.num_human_players == 1:
-                print("\n  Starting Human vs Computer game...")
-                print("  You are Player X")
+                # Ask who should start first
+                self.human_player_symbol = PlayerInput.get_starting_player()
+                if self.human_player_symbol == 'X':
+                    print("\n  Starting Human vs Computer game...")
+                    print("  You are Player X and will start first")
+                else:
+                    print("\n  Starting Human vs Computer game...")
+                    print("  You are Player O and the computer will start first")
             else:
                 print("\n  Starting Human vs Human game...")
             
