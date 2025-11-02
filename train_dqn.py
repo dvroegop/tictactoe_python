@@ -8,7 +8,9 @@ def outcome_reward(winner: str | None, mover: str) -> float:
     return +1.0 if mover == winner else -1.0
 
 def train(episodes=8000):
-    agent = DQNAgent(DQNConfig())
+    cfg = DQNConfig()
+    cfg.verbose = False  # Disable verbose output during training for speed
+    agent = DQNAgent(cfg)
     print(f"Device: {agent.cfg.device}")
 
     for ep in range(1, episodes + 1):

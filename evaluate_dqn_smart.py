@@ -102,7 +102,9 @@ def evaluate_against_smart_opponent(policy_path="dqn_policy.pt"):
     print("=" * 60)
     
     # Load trained agent
-    agent = DQNAgent(DQNConfig())
+    cfg = DQNConfig()
+    cfg.verbose = False  # Disable verbose output during evaluation for cleaner results
+    agent = DQNAgent(cfg)
     try:
         agent.load(policy_path)
         print(f"✓ Loaded policy from {policy_path}")
