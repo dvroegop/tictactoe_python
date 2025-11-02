@@ -26,6 +26,63 @@ class GameController:
         self._rl_agent: Optional[RLAgent] = None
         self._dq_agent = None  # DQNAgent instance, if available
     
+    def _get_ai_move(self):
+        """Get computer move based on current AI type
+        
+        Returns:
+            int or None: Position to move (0-8) or None if no valid move
+        """
+        if PlayerInput._ai_kind == "rl":
+            # Init once if chosen
+            if self._rl_agent is None:
+                self._rl_agent = RLAgent()
+                try:
+                    self._rl_agent.load("q_table.json")
+                    print("  [AI] RL policy loaded.")
+                except Exception:
+                    print("  [AI] No policy loaded; using random fallback.")
+            # Let RL pick based on the actual board
+            if self._rl_agent:
+                position = self._rl_agent.pick_move(self.game.board)
+                if position not in self.game.get_available_positions():
+                    # Safety: fallback
+                    position = PlayerInput.get_computer_move(
+                        self.game.current_player,
+                        self.game.get_available_positions()
+                    )
+            else:
+                position = PlayerInput.get_computer_move(
+                    self.game.current_player,
+                    self.game.get_available_positions()
+                )
+        elif PlayerInput._ai_kind == "dq":
+            # Use DQN agent to pick move
+            if self._dq_agent is None:
+                if DQNAgent is None:
+                    print("  [AI] DQN not available (torch not installed); using random fallback.")
+                    PlayerInput._ai_kind = "random"
+                else:
+                    self._dq_agent = DQNAgent()
+                    try:
+                        self._dq_agent.load("dqn_policy.pt")
+                        print("  [AI] DQN policy loaded.")
+                    except Exception:
+                        print("  [AI] No DQN policy loaded; using random fallback.")
+                        PlayerInput._ai_kind = "random"  # fallback
+                        self._dq_agent = None
+            if self._dq_agent is not None:
+                position = self._dq_agent.pick_move(self.game.board, self.game.current_player)
+                if position not in self.game.get_available_positions():
+                    position = random.choice(self.game.get_available_positions())
+            else:
+                position = random.choice(self.game.get_available_positions())
+        else:
+            position = PlayerInput.get_computer_move(
+                self.game.current_player,
+                self.game.get_available_positions()
+            )
+        return position
+    
     def play_game(self):
         """Main game loop"""
         self.game.reset()
@@ -57,55 +114,7 @@ class GameController:
                 self.game.make_move(position)
             else:
                 # computer move
-                if PlayerInput._ai_kind == "rl":
-                    # Init once if chosen
-                    if self._rl_agent is None:
-                        self._rl_agent = RLAgent()
-                        try:
-                            self._rl_agent.load("q_table.json")
-                            print("  [AI] RL policy loaded.")
-                        except Exception:
-                            print("  [AI] No policy loaded; using random fallback.")
-                    # Let RL pick based on the actual board
-                    if self._rl_agent:
-                        position = self._rl_agent.pick_move(self.game.board)
-                        if position not in self.game.get_available_positions():
-                            # Safety: fallback
-                            position = PlayerInput.get_computer_move(
-                                self.game.current_player,
-                                self.game.get_available_positions()
-                            )
-                    else:
-                        position = PlayerInput.get_computer_move(
-                            self.game.current_player,
-                            self.game.get_available_positions()
-                        )
-                elif PlayerInput._ai_kind == "dq":
-                    # Use DQN agent to pick move
-                    if self._dq_agent is None:
-                        if DQNAgent is None:
-                            print("  [AI] DQN not available (torch not installed); using random fallback.")
-                            PlayerInput._ai_kind = "random"
-                        else:
-                            self._dq_agent = DQNAgent()
-                            try:
-                                self._dq_agent.load("dqn_policy.pt")
-                                print("  [AI] DQN policy loaded.")
-                            except Exception:
-                                print("  [AI] No DQN policy loaded; using random fallback.")
-                                PlayerInput._ai_kind = "random"  # fallback
-                            self._dq_agent = None
-                    if self._dq_agent is not None:
-                        position = self._dq_agent.pick_move(self.game.board, self.game.current_player)
-                        if position not in self.game.get_available_positions():
-                            position = random.choice(self.game.get_available_positions())
-                    else:
-                        position = random.choice(self.game.get_available_positions())
-                else:
-                    position = PlayerInput.get_computer_move(
-                        self.game.current_player,
-                        self.game.get_available_positions()
-                    )
+                position = self._get_ai_move()
                 if position is not None:
                     self.game.make_move(position)
                     
@@ -171,48 +180,8 @@ class GameController:
         self.game.reset()
         
         while True:
-            # Get computer move
-            if PlayerInput._ai_kind == "rl":
-                if self._rl_agent is None:
-                    self._rl_agent = RLAgent()
-                    try:
-                        self._rl_agent.load("q_table.json")
-                    except Exception:
-                        pass
-                if self._rl_agent:
-                    position = self._rl_agent.pick_move(self.game.board)
-                    if position not in self.game.get_available_positions():
-                        position = PlayerInput.get_computer_move(
-                            self.game.current_player,
-                            self.game.get_available_positions()
-                        )
-                else:
-                    position = PlayerInput.get_computer_move(
-                        self.game.current_player,
-                        self.game.get_available_positions()
-                    )
-            elif PlayerInput._ai_kind == "dq":
-                if self._dq_agent is None:
-                    if DQNAgent is None:
-                        PlayerInput._ai_kind = "random"
-                    else:
-                        self._dq_agent = DQNAgent()
-                        try:
-                            self._dq_agent.load("dqn_policy.pt")
-                        except Exception:
-                            PlayerInput._ai_kind = "random"
-                            self._dq_agent = None
-                if self._dq_agent is not None:
-                    position = self._dq_agent.pick_move(self.game.board, self.game.current_player)
-                    if position not in self.game.get_available_positions():
-                        position = random.choice(self.game.get_available_positions())
-                else:
-                    position = random.choice(self.game.get_available_positions())
-            else:
-                position = PlayerInput.get_computer_move(
-                    self.game.current_player,
-                    self.game.get_available_positions()
-                )
+            # Get computer move using shared helper
+            position = self._get_ai_move()
             
             if position is not None:
                 self.game.make_move(position)
