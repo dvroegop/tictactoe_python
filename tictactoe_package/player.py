@@ -89,13 +89,18 @@ class PlayerInput:
     
     @staticmethod
     def get_starting_player() -> str:
-        """Ask who should start first: human or computer"""
+        """Ask who should start first: human or computer
+        
+        Returns:
+            'X' if human should start (human plays as X)
+            'O' if computer should start (human plays as O, computer plays as X since X always starts)
+        """
         while True:
             raw = input("  Who should start? [H]uman or [C]omputer: ").strip().lower()
             if raw.startswith("h"):
-                return "X"  # Human starts as X
+                return "X"  # Human plays as X and starts first
             elif raw.startswith("c"):
-                return "O"  # Computer starts as X, human is O
+                return "O"  # Human plays as O, computer plays as X and starts first
             print("  Please enter 'H' for Human or 'C' for Computer.")
     
     @staticmethod
