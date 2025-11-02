@@ -9,6 +9,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+# ----- Constants -----
+
+ILLEGAL_ACTION_VALUE = -1e9  # Q-value assigned to illegal actions during learning
+
 # ----- Utilities -----
 
 def encode_board(board: List[str], current_player: str) -> torch.Tensor:
@@ -139,7 +143,7 @@ class DQNAgent:
             # Apply mask_next if available to prevent illegal move bootstrapping
             if mask_next[0] is not None:
                 mask_next = torch.stack(mask_next).to(self.cfg.device)  # (B, 9)
-                q_next_all = q_next_all.masked_fill(mask_next < 0.5, -1e9)
+                q_next_all = q_next_all.masked_fill(mask_next < 0.5, ILLEGAL_ACTION_VALUE)
             q_next = q_next_all.max(1).values
             target = r + self.cfg.gamma * q_next * (1.0 - done)
 

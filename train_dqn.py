@@ -3,23 +3,37 @@ from tictactoe_package.dqn_agent import DQNAgent, DQNConfig, encode_board, legal
 from tictactoe_package.game import TicTacToe  # your existing environment
 import random
 
+# ----- Constants -----
+
+SMART_OPPONENT_FREQUENCY = 4  # Train against smart opponent every Nth episode
+
+# ----- Helper Functions -----
+
 def outcome_reward(winner: str | None, mover: str) -> float:
     if winner is None:
         return 0.0
     return +1.0 if mover == winner else -1.0
 
 def check_winning_move(board, player):
-    """Check if there's a winning move for the player"""
-    for pos in range(9):
-        if board[pos] == ' ':
-            # Try the move
-            board[pos] = player
-            game = TicTacToe()
-            game.board = board.copy()
-            if game.check_winner() == player:
-                board[pos] = ' '  # Undo
-                return pos
-            board[pos] = ' '  # Undo
+    """Check if there's a winning move for the player.
+    
+    Returns position index if winning move exists, None otherwise.
+    """
+    # Winning combinations to check
+    winning_combinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
+        [0, 4, 8], [2, 4, 6]              # Diagonals
+    ]
+    
+    for combo in winning_combinations:
+        positions = [board[i] for i in combo]
+        # Check if two positions have player's mark and one is empty
+        if positions.count(player) == 2 and positions.count(' ') == 1:
+            # Return the empty position that would complete the line
+            empty_idx = positions.index(' ')
+            return combo[empty_idx]
+    
     return None
 
 def smart_opponent_move(board, opponent_mark):
@@ -68,13 +82,13 @@ def train(episodes=30000):
         # Track previous DQN player's experience to update when opponent wins
         prev_dqn_experience = None  # (state, action, mover)
         
-        # Decide if this episode uses smart opponent (every 4th episode)
-        use_smart = (ep % 4 == 0)
+        # Decide if this episode uses smart opponent (every Nth episode)
+        use_smart = (ep % SMART_OPPONENT_FREQUENCY == 0)
         
         # In smart episodes, randomly decide if DQN plays X or O
         # dqn_player will be 'X' or 'O', and smart opponent plays the other
         if use_smart:
-            dqn_player = 'X' if random.random() < 0.5 else 'O'
+            dqn_player = random.choice(['X', 'O'])
         else:
             dqn_player = None  # DQN plays both sides
         
