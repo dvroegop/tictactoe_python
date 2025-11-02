@@ -122,7 +122,7 @@ def evaluate_against_smart_opponent(policy_path="dqn_policy.pt"):
             results['Draw'] += 1
     
     print(f"DQN (X) wins: {results['X']}")
-    print(f"Smart (O) losses for DQN: {results['O']}")
+    print(f"Smart (O) wins (DQN losses): {results['O']}")
     print(f"Draws: {results['Draw']}")
     print(f"DQN win/draw rate: {(results['X'] + results['Draw'])}%")
     

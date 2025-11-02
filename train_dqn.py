@@ -40,14 +40,15 @@ def train(episodes=8000):
                 
                 # If there was a previous player and current player won, 
                 # update previous player's experience with negative reward
-                if prev_experience is not None and winner is not None and winner != prev_experience[2]:
+                if prev_experience is not None and winner is not None:
                     prev_s, prev_a, prev_mover = prev_experience
-                    # Previous player's move led to opponent winning
-                    prev_r = -1.0 + step_penalty  # Loss reward
-                    prev_s_next = encode_board(env.board, prev_mover)  # terminal state from prev player's perspective
-                    agent.remember(prev_s, prev_a, prev_r, prev_s_next, True)
-                    agent.step_count += 1
-                    agent.learn()
+                    if winner != prev_mover:
+                        # Previous player's move led to opponent winning
+                        prev_r = -1.0 + step_penalty  # Loss reward
+                        prev_s_next = encode_board(env.board, prev_mover)  # terminal state from prev player's perspective
+                        agent.remember(prev_s, prev_a, prev_r, prev_s_next, True)
+                        agent.step_count += 1
+                        agent.learn()
                 
                 break
             else:

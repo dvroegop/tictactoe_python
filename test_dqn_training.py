@@ -49,16 +49,19 @@ def test_losing_move_is_trained():
     
     assert winner == 'O', "O should have won"
     
+    # Define rewards based on training logic
+    step_penalty = -0.01
+    win_reward = 1.0 + step_penalty
+    loss_reward = -1.0 + step_penalty
+    
     # Simulate what the training loop should do:
     # 1. Store O's winning move
-    r_o = 1.0 + (-0.01)  # win reward + step penalty
     s_next_o = encode_board(env.board, 'O')
-    agent.remember(s_o, 2, r_o, s_next_o, True)
+    agent.remember(s_o, 2, win_reward, s_next_o, True)
     
     # 2. Store X's losing move (the fix we implemented)
-    r_x = -1.0 + (-0.01)  # loss reward + step penalty
     s_next_x = encode_board(env.board, 'X')
-    agent.remember(s_x, 5, r_x, s_next_x, True)
+    agent.remember(s_x, 5, loss_reward, s_next_x, True)
     
     # Verify both transitions were added
     assert len(agent.buffer) == initial_buffer_size + 2, \
@@ -69,12 +72,12 @@ def test_losing_move_is_trained():
     
     # First should be O's winning move with positive reward
     _, _, r1, _, done1 = last_two[0]
-    assert r1 > 0.9, f"O's move should have positive reward, got {r1}"
+    assert r1 > win_reward - 0.01, f"O's move should have positive reward ~{win_reward}, got {r1}"
     assert done1 == True, "O's move should be marked as done"
     
     # Second should be X's losing move with negative reward
     _, _, r2, _, done2 = last_two[1]
-    assert r2 < -0.9, f"X's move should have negative reward, got {r2}"
+    assert r2 < loss_reward + 0.01, f"X's move should have negative reward ~{loss_reward}, got {r2}"
     assert done2 == True, "X's move should be marked as done"
     
     print("  ✓ Both winning and losing moves correctly stored with appropriate rewards")
