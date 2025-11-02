@@ -71,13 +71,19 @@ def train(episodes=30000):
         # Decide if this episode uses smart opponent (every 4th episode)
         use_smart = (ep % 4 == 0)
         
+        # In smart episodes, randomly decide if DQN plays X or O
+        # dqn_player will be 'X' or 'O', and smart opponent plays the other
+        if use_smart:
+            dqn_player = 'X' if random.random() < 0.5 else 'O'
+        else:
+            dqn_player = None  # DQN plays both sides
+        
         # play one episode
         while True:
             s = encode_board(env.board, env.current_player)
             
             # Determine if this is a DQN move or smart opponent move
-            # In smart opponent mode: odd steps (1, 3, 5...) are smart opponent, even steps (0, 2, 4...) are DQN
-            is_smart_opponent_turn = use_smart and (step_in_ep % 2 == 1)
+            is_smart_opponent_turn = use_smart and (env.current_player != dqn_player)
             
             if is_smart_opponent_turn:
                 # Smart opponent's turn
