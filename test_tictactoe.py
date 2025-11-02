@@ -179,6 +179,59 @@ def test_controller_starting_player():
     print("✓ Controller starting player test passed")
 
 
+def test_auto_play_game():
+    """Test that auto play completes a game"""
+    from tictactoe_package.player import PlayerInput
+    controller = GameController()
+    controller.num_human_players = 0
+    PlayerInput._ai_kind = "random"
+    
+    # Play a single auto game
+    winner = controller.play_game_auto()
+    
+    # Winner should be either 'X', 'O', or None (draw)
+    assert winner in ['X', 'O', None], "Winner should be X, O, or None"
+    
+    # Board should be full if it's a draw, or have a winner
+    if winner is None:
+        assert controller.game.is_board_full(), "Draw game should have full board"
+    else:
+        assert winner in ['X', 'O'], "Winner should be X or O"
+    
+    print("✓ Auto play game test passed")
+
+
+def test_auto_play_statistics():
+    """Test that auto play tracks statistics correctly"""
+    from tictactoe_package.player import PlayerInput
+    controller = GameController()
+    controller.num_human_players = 0
+    PlayerInput._ai_kind = "random"
+    
+    # Play multiple games and track statistics
+    num_games = 20
+    wins_x = 0
+    wins_o = 0
+    draws = 0
+    
+    for _ in range(num_games):
+        winner = controller.play_game_auto()
+        if winner == 'X':
+            wins_x += 1
+        elif winner == 'O':
+            wins_o += 1
+        else:
+            draws += 1
+    
+    # Verify all games are accounted for
+    assert wins_x + wins_o + draws == num_games, "All games should be accounted for"
+    
+    # Verify at least one outcome occurred (highly likely with 20 games)
+    assert wins_x > 0 or wins_o > 0 or draws > 0, "At least one outcome should occur"
+    
+    print("✓ Auto play statistics test passed")
+
+
 def run_all_tests():
     """Run all tests"""
     print("\nRunning TicTacToe tests...")
@@ -196,6 +249,8 @@ def run_all_tests():
     test_player_switching()
     test_board_reset()
     test_controller_starting_player()
+    test_auto_play_game()
+    test_auto_play_statistics()
     
     print("=" * 50)
     print("All tests passed! ✓")

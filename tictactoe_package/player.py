@@ -30,6 +30,8 @@ class PlayerInput:
         raw = input("  Computer type: [R]andom or [L]earning (Q-Learning) or [D]eep Q-Learning? ").strip().lower()
         if raw.startswith("r"):
             return "random"
+        if raw.startswith("l"):
+            return "rl"
         if raw.startswith("d"):
             return "dq"
         return "random"
