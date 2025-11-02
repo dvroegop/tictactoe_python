@@ -9,7 +9,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from tictactoe_package.dqn_agent import DQNAgent, DQNConfig, encode_board
+from tictactoe_package.dqn_agent import DQNAgent, DQNConfig, encode_board, legal_mask
 from tictactoe_package.game import TicTacToe
 
 
@@ -54,7 +54,8 @@ def test_training_loop_stores_losing_moves():
             if done:
                 r = outcome_reward(winner, mover) + step_penalty
                 s_next = encode_board(env.board, env.current_player)
-                agent.remember(s, a, r, s_next, True)
+                mask_next = legal_mask(env.board)
+                agent.remember(s, a, r, s_next, True, mask_next)
                 agent.step_count += 1
                 agent.learn()
                 
@@ -67,7 +68,8 @@ def test_training_loop_stores_losing_moves():
                     prev_s, prev_a, prev_mover = prev_experience
                     prev_r = -1.0 + step_penalty
                     prev_s_next = encode_board(env.board, prev_mover)
-                    agent.remember(prev_s, prev_a, prev_r, prev_s_next, True)
+                    prev_mask_next = legal_mask(env.board)
+                    agent.remember(prev_s, prev_a, prev_r, prev_s_next, True, prev_mask_next)
                     agent.step_count += 1
                     agent.learn()
                     
@@ -79,7 +81,8 @@ def test_training_loop_stores_losing_moves():
                 env.switch_player()
                 r = step_penalty
                 s_next = encode_board(env.board, env.current_player)
-                agent.remember(s, a, r, s_next, False)
+                mask_next = legal_mask(env.board)
+                agent.remember(s, a, r, s_next, False, mask_next)
                 agent.step_count += 1
                 agent.learn()
                 
