@@ -8,7 +8,10 @@ from .game import TicTacToe
 from .ui import GameUI
 from .player import PlayerInput
 from .rl_agent import RLAgent
-from .dqn_agent import DQNAgent
+try:
+    from .dqn_agent import DQNAgent
+except ImportError:
+    DQNAgent = None
 import random
 
 
@@ -21,7 +24,7 @@ class GameController:
         self.num_human_players = 2
         self.human_player_symbol = 'X'  # Track which symbol the human player uses
         self._rl_agent: Optional[RLAgent] = None
-        self._dq_agent: Optional[DQNAgent] = None
+        self._dq_agent = None  # DQNAgent instance, if available
     
     def play_game(self):
         """Main game loop"""
@@ -80,13 +83,17 @@ class GameController:
                 elif PlayerInput._ai_kind == "dq":
                     # Use DQN agent to pick move
                     if self._dq_agent is None:
-                        self._dq_agent = DQNAgent()
-                        try:
-                            self._dq_agent.load("dqn_policy.pt")
-                            print("  [AI] DQN policy loaded.")
-                        except Exception:
-                            print("  [AI] No DQN policy loaded; using random fallback.")
-                            PlayerInput._ai_kind = "random"  # fallback
+                        if DQNAgent is None:
+                            print("  [AI] DQN not available (torch not installed); using random fallback.")
+                            PlayerInput._ai_kind = "random"
+                        else:
+                            self._dq_agent = DQNAgent()
+                            try:
+                                self._dq_agent.load("dqn_policy.pt")
+                                print("  [AI] DQN policy loaded.")
+                            except Exception:
+                                print("  [AI] No DQN policy loaded; using random fallback.")
+                                PlayerInput._ai_kind = "random"  # fallback
                             self._dq_agent = None
                     if self._dq_agent is not None:
                         position = self._dq_agent.pick_move(self.game.board, self.game.current_player)
