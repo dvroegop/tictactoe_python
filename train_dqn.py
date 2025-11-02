@@ -1,13 +1,62 @@
 # train_dqn.py
-from tictactoe_package.dqn_agent import DQNAgent, DQNConfig, encode_board
+from tictactoe_package.dqn_agent import DQNAgent, DQNConfig, encode_board, legal_mask
 from tictactoe_package.game import TicTacToe  # your existing environment
+import random
 
 def outcome_reward(winner: str | None, mover: str) -> float:
     if winner is None:
         return 0.0
     return +1.0 if mover == winner else -1.0
 
-def train(episodes=8000):
+def check_winning_move(board, player):
+    """Check if there's a winning move for the player"""
+    for pos in range(9):
+        if board[pos] == ' ':
+            # Try the move
+            board[pos] = player
+            game = TicTacToe()
+            game.board = board.copy()
+            if game.check_winner() == player:
+                board[pos] = ' '  # Undo
+                return pos
+            board[pos] = ' '  # Undo
+    return None
+
+def smart_opponent_move(board, opponent_mark):
+    """
+    Smart opponent strategy:
+    1. Win if possible
+    2. Block opponent from winning
+    3. Take center if available
+    4. Take corner
+    5. Random
+    """
+    # 1. Check if we can win
+    winning_move = check_winning_move(board, opponent_mark)
+    if winning_move is not None:
+        return winning_move
+    
+    # 2. Check if we need to block opponent
+    player_mark = 'X' if opponent_mark == 'O' else 'O'
+    blocking_move = check_winning_move(board, player_mark)
+    if blocking_move is not None:
+        return blocking_move
+    
+    # 3. Take center if available
+    if board[4] == ' ':
+        return 4
+    
+    # 4. Take a corner
+    corners = [0, 2, 6, 8]
+    available_corners = [c for c in corners if board[c] == ' ']
+    if available_corners:
+        return random.choice(available_corners)
+    
+    # 5. Take any available space
+    available = [i for i in range(9) if board[i] == ' ']
+    return random.choice(available) if available else None
+
+def train(episodes=30000):
     cfg = DQNConfig()
     cfg.verbose = False  # Disable verbose output during training for speed
     agent = DQNAgent(cfg)
@@ -19,12 +68,29 @@ def train(episodes=8000):
         # Track previous player's experience to update when opponent wins
         prev_experience = None  # (state, action, mover)
         
+        # Decide if this episode uses smart opponent (every 4th episode)
+        use_smart = (ep % 4 == 0)
+        
         # play one episode
         while True:
             s = encode_board(env.board, env.current_player)
-            a = agent.select_action(env.board, env.current_player, explore=True)
-            if a == -1:
-                break  # no legal moves
+            
+            # Determine if we should use smart opponent for this move
+            # Smart opponent plays when it's enabled AND we're on the second player's turn
+            # We need to track which moves are made by DQN vs smart opponent
+            # For simplicity, DQN always starts, and smart opponent responds
+            is_dqn_turn = (step_in_ep % 2 == 0) if not use_smart else True
+            
+            if use_smart and step_in_ep % 2 == 1:
+                # Smart opponent's turn
+                a = smart_opponent_move(env.board, env.current_player)
+                if a is None:
+                    break  # no legal moves
+            else:
+                # DQN's turn
+                a = agent.select_action(env.board, env.current_player, explore=True)
+                if a == -1:
+                    break  # no legal moves
 
             # take action
             mover = env.current_player
@@ -35,10 +101,14 @@ def train(episodes=8000):
 
             if done:
                 r = outcome_reward(winner, mover) + step_penalty
-                s_next = encode_board(env.board, env.current_player)  # terminal snapshot (unused)
-                agent.remember(s, a, r, s_next, True)
-                agent.step_count += 1
-                agent.learn()
+                s_next = encode_board(env.board, env.current_player)  # terminal snapshot
+                mask_next = legal_mask(env.board)
+                
+                # Only remember if this was a DQN move
+                if not use_smart or step_in_ep % 2 == 0:
+                    agent.remember(s, a, r, s_next, True, mask_next)
+                    agent.step_count += 1
+                    agent.learn()
                 
                 # If there was a previous player and current player won, 
                 # update previous player's experience with negative reward
@@ -48,7 +118,8 @@ def train(episodes=8000):
                         # Previous player's move led to opponent winning
                         prev_r = -1.0 + step_penalty  # Loss reward
                         prev_s_next = encode_board(env.board, prev_mover)  # terminal state from prev player's perspective
-                        agent.remember(prev_s, prev_a, prev_r, prev_s_next, True)
+                        prev_mask_next = legal_mask(env.board)
+                        agent.remember(prev_s, prev_a, prev_r, prev_s_next, True, prev_mask_next)
                         agent.step_count += 1
                         agent.learn()
                 
@@ -58,12 +129,16 @@ def train(episodes=8000):
                 env.switch_player()
                 r = step_penalty
                 s_next = encode_board(env.board, env.current_player)
-                agent.remember(s, a, r, s_next, False)
-                agent.step_count += 1
-                agent.learn()
+                mask_next = legal_mask(env.board)
                 
-                # Store current experience as previous for next iteration
-                prev_experience = (s, a, mover)
+                # Only remember if this was a DQN move
+                if not use_smart or step_in_ep % 2 == 0:
+                    agent.remember(s, a, r, s_next, False, mask_next)
+                    agent.step_count += 1
+                    agent.learn()
+                    
+                    # Store current experience as previous for next iteration
+                    prev_experience = (s, a, mover)
 
             step_in_ep += 1
 
@@ -74,4 +149,4 @@ def train(episodes=8000):
     print("Saved DQN policy -> dqn_policy.pt")
 
 if __name__ == "__main__":
-    train(episodes=8000)
+    train(episodes=30000)

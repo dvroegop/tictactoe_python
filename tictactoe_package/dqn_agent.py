@@ -52,10 +52,10 @@ class DQNConfig:
     batch_size: int = 64
     buffer_size: int = 50_000
     start_training_after: int = 500       # warm-up transitions
-    target_sync_every: int = 500          # steps
+    target_sync_every: int = 200          # steps (changed from 500)
     epsilon_start: float = 1.0
     epsilon_end: float = 0.05
-    epsilon_decay_steps: int = 5_000
+    epsilon_decay_steps: int = 20_000     # changed from 5_000
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
     verbose: bool = True                  # print Q-value explanations during action selection
 
@@ -108,8 +108,9 @@ class DQNAgent:
 
     # ---------- Replay memory ----------
 
-    def remember(self, s, a, r, s_next, done):
-        self.buffer.append((s, a, r, s_next, done))
+    def remember(self, s, a, r, s_next, done, mask_next=None):
+        """Store experience in replay buffer with optional next-state legal mask."""
+        self.buffer.append((s, a, r, s_next, done, mask_next))
 
     # ---------- Learning ----------
 
@@ -121,7 +122,7 @@ class DQNAgent:
             return
 
         batch = random.sample(self.buffer, self.cfg.batch_size)
-        s, a, r, s_next, done = zip(*batch)
+        s, a, r, s_next, done, mask_next = zip(*batch)
         s = torch.stack(s).to(self.cfg.device)             # (B, 28)
         a = torch.tensor(a, dtype=torch.long, device=self.cfg.device)  # (B,)
         r = torch.tensor(r, dtype=torch.float32, device=self.cfg.device)  # (B,)
@@ -132,8 +133,14 @@ class DQNAgent:
         q = self.qnet(s).gather(1, a.view(-1, 1)).squeeze(1)  # (B,)
 
         # Target: r + gamma * max_a' Q_target(s',a') * (1 - done)
+        # Mask illegal actions in next state before taking max
         with torch.no_grad():
-            q_next = self.target(s_next).max(1).values
+            q_next_all = self.target(s_next)  # (B, 9)
+            # Apply mask_next if available to prevent illegal move bootstrapping
+            if mask_next[0] is not None:
+                mask_next = torch.stack(mask_next).to(self.cfg.device)  # (B, 9)
+                q_next_all = q_next_all.masked_fill(mask_next < 0.5, -1e9)
+            q_next = q_next_all.max(1).values
             target = r + self.cfg.gamma * q_next * (1.0 - done)
 
         loss = self.loss_fn(q, target)
