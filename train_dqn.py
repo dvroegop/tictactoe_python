@@ -14,6 +14,9 @@ def train(episodes=8000):
     for ep in range(1, episodes + 1):
         env = TicTacToe()
         step_in_ep = 0
+        # Track previous player's experience to update when opponent wins
+        prev_experience = None  # (state, action, mover)
+        
         # play one episode
         while True:
             s = encode_board(env.board, env.current_player)
@@ -34,6 +37,18 @@ def train(episodes=8000):
                 agent.remember(s, a, r, s_next, True)
                 agent.step_count += 1
                 agent.learn()
+                
+                # If there was a previous player and current player won, 
+                # update previous player's experience with negative reward
+                if prev_experience is not None and winner is not None and winner != prev_experience[2]:
+                    prev_s, prev_a, prev_mover = prev_experience
+                    # Previous player's move led to opponent winning
+                    prev_r = -1.0 + step_penalty  # Loss reward
+                    prev_s_next = encode_board(env.board, prev_mover)  # terminal state from prev player's perspective
+                    agent.remember(prev_s, prev_a, prev_r, prev_s_next, True)
+                    agent.step_count += 1
+                    agent.learn()
+                
                 break
             else:
                 # switch player and continue
@@ -43,6 +58,9 @@ def train(episodes=8000):
                 agent.remember(s, a, r, s_next, False)
                 agent.step_count += 1
                 agent.learn()
+                
+                # Store current experience as previous for next iteration
+                prev_experience = (s, a, mover)
 
             step_in_ep += 1
 
