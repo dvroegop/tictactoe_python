@@ -28,6 +28,9 @@ class GameController:
         self.game.reset()
         GameUI.display_positions()
         
+        # Prepare the board area once at the start
+        GameUI.prepare_board_area()
+        
         while True:
             GameUI.display_board(self.game.board)
             
