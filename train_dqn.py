@@ -65,8 +65,8 @@ def train(episodes=30000):
     for ep in range(1, episodes + 1):
         env = TicTacToe()
         step_in_ep = 0
-        # Track previous player's experience to update when opponent wins
-        prev_experience = None  # (state, action, mover)
+        # Track previous DQN player's experience to update when opponent wins
+        prev_dqn_experience = None  # (state, action, mover)
         
         # Decide if this episode uses smart opponent (every 4th episode)
         use_smart = (ep % 4 == 0)
@@ -75,13 +75,11 @@ def train(episodes=30000):
         while True:
             s = encode_board(env.board, env.current_player)
             
-            # Determine if we should use smart opponent for this move
-            # Smart opponent plays when it's enabled AND we're on the second player's turn
-            # We need to track which moves are made by DQN vs smart opponent
-            # For simplicity, DQN always starts, and smart opponent responds
-            is_dqn_turn = (step_in_ep % 2 == 0) if not use_smart else True
+            # Determine if this is a DQN move or smart opponent move
+            # In smart opponent mode: odd steps (1, 3, 5...) are smart opponent, even steps (0, 2, 4...) are DQN
+            is_smart_opponent_turn = use_smart and (step_in_ep % 2 == 1)
             
-            if use_smart and step_in_ep % 2 == 1:
+            if is_smart_opponent_turn:
                 # Smart opponent's turn
                 a = smart_opponent_move(env.board, env.current_player)
                 if a is None:
@@ -94,6 +92,7 @@ def train(episodes=30000):
 
             # take action
             mover = env.current_player
+            is_dqn_move = not is_smart_opponent_turn
             env.make_move(a)
             winner = env.check_winner()
             done = winner is not None or env.is_board_full()
@@ -105,17 +104,17 @@ def train(episodes=30000):
                 mask_next = legal_mask(env.board)
                 
                 # Only remember if this was a DQN move
-                if not use_smart or step_in_ep % 2 == 0:
+                if is_dqn_move:
                     agent.remember(s, a, r, s_next, True, mask_next)
                     agent.step_count += 1
                     agent.learn()
                 
-                # If there was a previous player and current player won, 
-                # update previous player's experience with negative reward
-                if prev_experience is not None and winner is not None:
-                    prev_s, prev_a, prev_mover = prev_experience
+                # If there was a previous DQN player and current player won, 
+                # update previous DQN player's experience with negative reward
+                if prev_dqn_experience is not None and winner is not None:
+                    prev_s, prev_a, prev_mover = prev_dqn_experience
                     if winner != prev_mover:
-                        # Previous player's move led to opponent winning
+                        # Previous DQN player's move led to opponent winning
                         prev_r = -1.0 + step_penalty  # Loss reward
                         prev_s_next = encode_board(env.board, prev_mover)  # terminal state from prev player's perspective
                         prev_mask_next = legal_mask(env.board)
@@ -132,13 +131,13 @@ def train(episodes=30000):
                 mask_next = legal_mask(env.board)
                 
                 # Only remember if this was a DQN move
-                if not use_smart or step_in_ep % 2 == 0:
+                if is_dqn_move:
                     agent.remember(s, a, r, s_next, False, mask_next)
                     agent.step_count += 1
                     agent.learn()
                     
                     # Store current experience as previous for next iteration
-                    prev_experience = (s, a, mover)
+                    prev_dqn_experience = (s, a, mover)
 
             step_in_ep += 1
 
