@@ -24,7 +24,8 @@ class GameController:
         self.num_human_players = 2
         self.human_player_symbol = 'X'  # Track which symbol the human player uses
         self._rl_agent: Optional[RLAgent] = None
-        self._dq_agent = None  # DQNAgent instance, if available
+        # Note: Can't use Optional[DQNAgent] since DQNAgent may be None (module not available)
+        self._dq_agent = None  # DQNAgent instance or None
     
     def _get_ai_move(self):
         """Get computer move based on current AI type
