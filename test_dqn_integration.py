@@ -26,7 +26,9 @@ def test_training_loop_stores_losing_moves():
     """
     print("\n✓ Testing training loop stores losing moves...")
     
-    agent = DQNAgent(DQNConfig())
+    cfg = DQNConfig()
+    cfg.verbose = False  # Disable verbose output during tests
+    agent = DQNAgent(cfg)
     
     # Track how many losing experiences we find
     losing_experiences = 0
