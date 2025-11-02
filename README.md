@@ -27,14 +27,18 @@ A console-based TicTacToe game inspired by Wargames and classic 80's computer ga
 
 2. **Select game mode:**
    - Enter `0` for Computer vs Computer
-   - Enter `1` for Human vs Computer (you play as X)
+   - Enter `1` for Human vs Computer
    - Enter `2` for Human vs Human
 
-3. **Choose AI type (if playing against computer):**
+3. **Choose who starts (if playing against computer):**
+   - Enter `H` for Human to start first (you play as X)
+   - Enter `C` for Computer to start first (you play as O)
+
+4. **Choose AI type (if playing against computer):**
    - Enter `R` for Random AI (simple, unpredictable moves)
    - Enter `L` for Q-Learning AI (trained, strategic play)
 
-4. **Make your move:**
+5. **Make your move:**
    - Enter a number from 1-9 to place your mark
    - The position reference shows which number corresponds to which cell:
      ```
@@ -45,7 +49,7 @@ A console-based TicTacToe game inspired by Wargames and classic 80's computer ga
      7 | 8 | 9
      ```
 
-5. **Win the game:**
+6. **Win the game:**
    - Get three in a row (horizontal, vertical, or diagonal) to win!
    - If all cells are filled with no winner, it's a draw
 

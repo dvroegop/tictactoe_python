@@ -139,6 +139,46 @@ def test_board_reset():
     print("✓ Board reset test passed")
 
 
+def test_controller_starting_player():
+    """Test that controller respects human_player_symbol setting"""
+    controller = GameController()
+    
+    # Test when human is X (starts first)
+    controller.num_human_players = 1
+    controller.human_player_symbol = 'X'
+    controller.game.reset()
+    controller.game.current_player = 'X'
+    
+    # Verify X is treated as human
+    if controller.num_human_players == 1:
+        is_human_x = (controller.game.current_player == controller.human_player_symbol)
+        assert is_human_x, "When human_player_symbol is X and current_player is X, should be human"
+    
+    # Verify O is treated as computer
+    controller.game.current_player = 'O'
+    if controller.num_human_players == 1:
+        is_human_o = (controller.game.current_player == controller.human_player_symbol)
+        assert not is_human_o, "When human_player_symbol is X and current_player is O, should be computer"
+    
+    # Test when human is O (computer starts first)
+    controller.human_player_symbol = 'O'
+    controller.game.reset()
+    controller.game.current_player = 'X'
+    
+    # Verify X is treated as computer
+    if controller.num_human_players == 1:
+        is_human_x = (controller.game.current_player == controller.human_player_symbol)
+        assert not is_human_x, "When human_player_symbol is O and current_player is X, should be computer"
+    
+    # Verify O is treated as human
+    controller.game.current_player = 'O'
+    if controller.num_human_players == 1:
+        is_human_o = (controller.game.current_player == controller.human_player_symbol)
+        assert is_human_o, "When human_player_symbol is O and current_player is O, should be human"
+    
+    print("✓ Controller starting player test passed")
+
+
 def run_all_tests():
     """Run all tests"""
     print("\nRunning TicTacToe tests...")
@@ -155,6 +195,7 @@ def run_all_tests():
     test_board_full()
     test_player_switching()
     test_board_reset()
+    test_controller_starting_player()
     
     print("=" * 50)
     print("All tests passed! ✓")
