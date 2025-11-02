@@ -24,7 +24,9 @@ def test_losing_move_is_trained():
     print("\n✓ Testing that losing moves are properly stored in training buffer...")
     
     # Create agent and environment
-    agent = DQNAgent(DQNConfig())
+    cfg = DQNConfig()
+    cfg.verbose = False  # Disable verbose output during tests
+    agent = DQNAgent(cfg)
     env = TicTacToe()
     
     # Set up a board state where X is about to lose
@@ -89,7 +91,9 @@ def test_draw_no_extra_experience():
     """
     print("\n✓ Testing that draws don't create incorrect experiences...")
     
-    agent = DQNAgent(DQNConfig())
+    cfg = DQNConfig()
+    cfg.verbose = False  # Disable verbose output during tests
+    agent = DQNAgent(cfg)
     env = TicTacToe()
     
     # Set up a board that will end in a draw with next move
@@ -128,7 +132,9 @@ def test_winning_move_gets_positive_reward():
     """
     print("\n✓ Testing that winning moves get positive rewards...")
     
-    agent = DQNAgent(DQNConfig())
+    cfg = DQNConfig()
+    cfg.verbose = False  # Disable verbose output during tests
+    agent = DQNAgent(cfg)
     env = TicTacToe()
     
     # Set up a board where X can win
