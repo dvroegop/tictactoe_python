@@ -17,7 +17,6 @@ class GameUI:
     CYAN = '\033[96m'       # Bright cyan for X
     YELLOW = '\033[93m'     # Bright yellow for O
     GREEN = '\033[92m'      # Bright green for titles
-    RED = '\033[91m'        # Bright red for important messages
     WHITE = '\033[97m'      # Bright white for grid
     BLUE = '\033[94m'       # Bright blue for borders
     MAGENTA = '\033[95m'    # Bright magenta for highlights
@@ -25,8 +24,9 @@ class GameUI:
     # Cursor control codes
     CLEAR_LINE = '\033[2K'
     MOVE_UP = '\033[F'
-    SAVE_CURSOR = '\033[s'
-    RESTORE_CURSOR = '\033[u'
+    
+    # Board display constants
+    BOARD_AREA_LINES = 18  # Number of lines reserved for board display
     
     @staticmethod
     def clear_screen():
@@ -59,12 +59,12 @@ class GameUI:
             else:
                 return f"{GameUI.WHITE}{symbol}{GameUI.RESET}"
         
-        # Clear the board area (18 lines total for board display)
-        for _ in range(18):
+        # Clear the board area
+        for _ in range(GameUI.BOARD_AREA_LINES):
             print(GameUI.CLEAR_LINE)
             
         # Move cursor back up to start of board area
-        print(GameUI.MOVE_UP * 18, end='')
+        print(GameUI.MOVE_UP * GameUI.BOARD_AREA_LINES, end='')
         
         # Display the board
         print(GameUI.BLUE + GameUI.BOLD + "="*50 + GameUI.RESET)
@@ -129,15 +129,10 @@ class GameUI:
         print()
     
     @staticmethod
-    def display_info_header(message):
-        """Display informational message above the board area"""
-        print(GameUI.MAGENTA + GameUI.BOLD + message + GameUI.RESET)
-    
-    @staticmethod
     def prepare_board_area():
         """Prepare space for the board display (reserve lines)"""
-        # Print 18 empty lines for the board area
-        for _ in range(18):
+        # Print empty lines for the board area
+        for _ in range(GameUI.BOARD_AREA_LINES):
             print()
         # Move cursor back to start of board area
-        print(GameUI.MOVE_UP * 18, end='')
+        print(GameUI.MOVE_UP * GameUI.BOARD_AREA_LINES, end='')
