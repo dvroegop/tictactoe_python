@@ -20,6 +20,8 @@ A console-based TicTacToe game inspired by Wargames and classic 80's computer ga
 
 ## How to Play
 
+### Interactive Mode
+
 1. **Run the game:**
    ```bash
    python3 tictactoe.py
@@ -52,6 +54,57 @@ A console-based TicTacToe game inspired by Wargames and classic 80's computer ga
 6. **Win the game:**
    - Get three in a row (horizontal, vertical, or diagonal) to win!
    - If all cells are filled with no winner, it's a draw
+
+### Auto Mode (Automated Gameplay)
+
+Run multiple games automatically without user interaction:
+
+```bash
+# Run 50 games (default)
+python3 tictactoe.py -auto
+
+# Run a custom number of games
+python3 tictactoe.py -auto 100
+```
+
+**Features:**
+- Computer vs Computer gameplay (no human players)
+- Choose AI type at startup (Random, Q-Learning, or Deep Q-Learning)
+- No user input required during gameplay
+- Displays comprehensive statistics at the end:
+  - Total games played
+  - Number and percentage of wins for X
+  - Number and percentage of wins for O
+  - Number and percentage of draws
+
+**Example output:**
+```
+==================================================
+           TIC TAC TOE - AUTO MODE
+==================================================
+
+  Running 50 games (Computer vs Computer)...
+  Please wait...
+
+  Computer type: [R]andom or [L]earning (Q-Learning) or [D]eep Q-Learning? r
+  Completed 10 / 50 games...
+  Completed 20 / 50 games...
+  Completed 30 / 50 games...
+  Completed 40 / 50 games...
+  Completed 50 / 50 games...
+
+==================================================
+                   RESULTS
+==================================================
+
+  Total games played: 50
+
+  Player X wins:        33  ( 66.0%)
+  Player O wins:        12  ( 24.0%)
+  Draws:                 5  ( 10.0%)
+
+==================================================
+```
 
 ## Requirements
 
