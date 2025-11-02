@@ -168,4 +168,4 @@ def train(episodes=30000):
     print("Saved DQN policy -> dqn_policy.pt")
 
 if __name__ == "__main__":
-    train(episodes=30000)
+    train(episodes=60000)
