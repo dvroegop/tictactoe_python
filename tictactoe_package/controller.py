@@ -44,7 +44,7 @@ class GameController:
                     print("  [AI] No policy loaded; using random fallback.")
             # Let RL pick based on the actual board
             if self._rl_agent:
-                position = self._rl_agent.pick_move(self.game.board)
+                position = self._rl_agent.pick_move(self.game.board, self.game.current_player)
                 if position not in self.game.get_available_positions():
                     # Safety: fallback
                     position = PlayerInput.get_computer_move(

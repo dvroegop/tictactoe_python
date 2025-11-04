@@ -9,9 +9,10 @@ from .game import TicTacToe  # uses your clean environment API
 State = str     # e.g., "X O  X   "
 Action = int    # 0..8 index
 
-def board_to_state(board: List[str]) -> State:
+def board_to_state(board: List[str], current_player: str) -> State:
     # Turn ['X',' ','O', ...] into a string; simple and readable
-    return "".join(board)
+    # Append current_player to distinguish between X's turn and O's turn
+    return "".join(board) + "|" + current_player
 
 @dataclass
 class RLAgent:
@@ -52,11 +53,12 @@ class RLAgent:
 
             # Play an episode
             while True:
-                s = board_to_state(env.board)
+                mover = env.current_player  # The player who is about to move
+                s = board_to_state(env.board, mover)
                 legal = env.get_available_positions()
                 a = self.choose_action(s, legal, explore=True)
                 env.make_move(a)
-                trajectory.append((s, a, env.current_player))  # current_player is the symbol *before* switch
+                trajectory.append((s, a, mover))  # Save state with player who moved
 
                 winner = env.check_winner()
                 if winner or env.is_board_full():
@@ -85,7 +87,7 @@ class RLAgent:
                 env.switch_player()
 
                 # Next step update (temporal difference) with step reward ~0 except tiny time penalty
-                s_next = board_to_state(env.board)
+                s_next = board_to_state(env.board, env.current_player)
                 legal_next = env.get_available_positions()
                 self.update(s, a, -0.01, s_next, legal_next)
 
@@ -94,8 +96,8 @@ class RLAgent:
 
     # ---------- Inference ----------
 
-    def pick_move(self, board: List[str]) -> int:
-        s = board_to_state(board)
+    def pick_move(self, board: List[str], current_player: str) -> int:
+        s = board_to_state(board, current_player)
         legal = [i for i, v in enumerate(board) if v == ' ']
         if not legal:
             return -1
