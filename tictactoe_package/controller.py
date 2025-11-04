@@ -180,6 +180,9 @@ class GameController:
         """
         self.game.reset()
         
+        if random.random() < 0.5:
+            self.game.current_player = 'O'
+            
         while True:
             # Get computer move using shared helper
             position = self._get_ai_move()

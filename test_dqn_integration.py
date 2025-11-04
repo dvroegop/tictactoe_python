@@ -15,7 +15,7 @@ from tictactoe_package.game import TicTacToe
 
 def outcome_reward(winner: str | None, mover: str) -> float:
     if winner is None:
-        return 0.0
+        return 0.2  # make draw slightly positive to encourage avoiding losses
     return +1.0 if mover == winner else -1.0
 
 

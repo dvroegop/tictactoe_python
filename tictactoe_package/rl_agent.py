@@ -76,7 +76,7 @@ class RLAgent:
                     # Also add a tiny step penalty to encourage faster endings.
                     for (s_t, a_t, mover) in reversed(trajectory):
                         if winner is None:
-                            r = 0.0
+                            r = 0.2  # make draw slightly positive to encourage avoiding losses
                         else:
                             r = +1.0 if mover == winner else -1.0
                         r -= 0.01  # small time penalty

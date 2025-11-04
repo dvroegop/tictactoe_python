@@ -11,7 +11,7 @@ SMART_OPPONENT_FREQUENCY = 4  # Train against smart opponent every Nth episode
 
 def outcome_reward(winner: str | None, mover: str) -> float:
     if winner is None:
-        return 0.0
+        return 0.2  # make draw slightly positive to encourage avoiding losses
     return +1.0 if mover == winner else -1.0
 
 def check_winning_move(board, player):
@@ -168,4 +168,4 @@ def train(episodes=30000):
     print("Saved DQN policy -> dqn_policy.pt")
 
 if __name__ == "__main__":
-    train(episodes=60000)
+    train(episodes=30000)
