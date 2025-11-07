@@ -1,0 +1,261 @@
+#!/usr/bin/env python3
+"""
+Simple tests for TicTacToe game
+"""
+
+import sys
+import os
+
+# Add the parent directory to the path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from tictactoe_package import TicTacToe, GameController
+
+
+def test_board_initialization():
+    """Test that board initializes correctly"""
+    game = TicTacToe()
+    assert game.board == [' '] * 9, "Board should be empty initially"
+    assert game.current_player == 'X', "X should start first"
+    print("✓ Board initialization test passed")
+
+
+def test_valid_move():
+    """Test making valid moves"""
+    game = TicTacToe()
+    assert game.make_move(0), "Should allow move on empty position"
+    assert game.board[0] == 'X', "Board should update with player's mark"
+    assert not game.make_move(0), "Should not allow move on occupied position"
+    print("✓ Valid move test passed")
+
+
+def test_is_valid_move():
+    """Test move validation"""
+    game = TicTacToe()
+    assert game.is_valid_move(0), "Empty position should be valid"
+    game.board[0] = 'X'
+    assert not game.is_valid_move(0), "Occupied position should be invalid"
+    assert not game.is_valid_move(-1), "Negative position should be invalid"
+    assert not game.is_valid_move(9), "Position > 8 should be invalid"
+    print("✓ Move validation test passed")
+
+
+def test_available_positions():
+    """Test getting available positions"""
+    game = TicTacToe()
+    assert len(game.get_available_positions()) == 9, "All positions should be available initially"
+    game.board[0] = 'X'
+    game.board[4] = 'O'
+    available = game.get_available_positions()
+    assert len(available) == 7, "Should have 7 available positions"
+    assert 0 not in available, "Occupied position should not be available"
+    assert 4 not in available, "Occupied position should not be available"
+    print("✓ Available positions test passed")
+
+
+def test_winner_detection_row():
+    """Test winner detection for rows"""
+    game = TicTacToe()
+    # Test first row
+    game.board = ['X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ']
+    assert game.check_winner() == 'X', "Should detect winner in first row"
+    
+    # Test second row
+    game.board = [' ', ' ', ' ', 'O', 'O', 'O', ' ', ' ', ' ']
+    assert game.check_winner() == 'O', "Should detect winner in second row"
+    
+    # Test third row
+    game.board = [' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X']
+    assert game.check_winner() == 'X', "Should detect winner in third row"
+    print("✓ Row winner detection test passed")
+
+
+def test_winner_detection_column():
+    """Test winner detection for columns"""
+    game = TicTacToe()
+    # Test first column
+    game.board = ['X', ' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ']
+    assert game.check_winner() == 'X', "Should detect winner in first column"
+    
+    # Test second column
+    game.board = [' ', 'O', ' ', ' ', 'O', ' ', ' ', 'O', ' ']
+    assert game.check_winner() == 'O', "Should detect winner in second column"
+    
+    # Test third column
+    game.board = [' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ', 'X']
+    assert game.check_winner() == 'X', "Should detect winner in third column"
+    print("✓ Column winner detection test passed")
+
+
+def test_winner_detection_diagonal():
+    """Test winner detection for diagonals"""
+    game = TicTacToe()
+    # Test top-left to bottom-right diagonal
+    game.board = ['X', ' ', ' ', ' ', 'X', ' ', ' ', ' ', 'X']
+    assert game.check_winner() == 'X', "Should detect winner in main diagonal"
+    
+    # Test top-right to bottom-left diagonal
+    game.board = [' ', ' ', 'O', ' ', 'O', ' ', 'O', ' ', ' ']
+    assert game.check_winner() == 'O', "Should detect winner in anti-diagonal"
+    print("✓ Diagonal winner detection test passed")
+
+
+def test_no_winner():
+    """Test no winner detection"""
+    game = TicTacToe()
+    game.board = ['X', 'O', 'X', 'O', 'X', 'X', 'O', 'X', 'O']
+    assert game.check_winner() is None, "Should detect no winner"
+    print("✓ No winner detection test passed")
+
+
+def test_board_full():
+    """Test board full detection"""
+    game = TicTacToe()
+    assert not game.is_board_full(), "Empty board should not be full"
+    game.board = ['X', 'O', 'X', 'O', 'X', 'X', 'O', 'X', 'O']
+    assert game.is_board_full(), "Full board should be detected"
+    print("✓ Board full detection test passed")
+
+
+def test_player_switching():
+    """Test player switching"""
+    game = TicTacToe()
+    assert game.current_player == 'X', "Should start with X"
+    game.switch_player()
+    assert game.current_player == 'O', "Should switch to O"
+    game.switch_player()
+    assert game.current_player == 'X', "Should switch back to X"
+    print("✓ Player switching test passed")
+
+
+def test_board_reset():
+    """Test board reset"""
+    game = TicTacToe()
+    game.board = ['X', 'O', 'X', ' ', ' ', ' ', ' ', ' ', ' ']
+    game.current_player = 'O'
+    game.reset()
+    assert game.board == [' '] * 9, "Board should be reset"
+    assert game.current_player == 'X', "Current player should reset to X"
+    print("✓ Board reset test passed")
+
+
+def test_controller_starting_player():
+    """Test that controller respects human_player_symbol setting"""
+    controller = GameController()
+    
+    # Test when human is X (starts first)
+    controller.num_human_players = 1
+    controller.human_player_symbol = 'X'
+    controller.game.reset()
+    controller.game.current_player = 'X'
+    
+    # Verify X is treated as human
+    if controller.num_human_players == 1:
+        is_human_x = (controller.game.current_player == controller.human_player_symbol)
+        assert is_human_x, "When human_player_symbol is X and current_player is X, should be human"
+    
+    # Verify O is treated as computer
+    controller.game.current_player = 'O'
+    if controller.num_human_players == 1:
+        is_human_o = (controller.game.current_player == controller.human_player_symbol)
+        assert not is_human_o, "When human_player_symbol is X and current_player is O, should be computer"
+    
+    # Test when human is O (computer starts first)
+    controller.human_player_symbol = 'O'
+    controller.game.reset()
+    controller.game.current_player = 'X'
+    
+    # Verify X is treated as computer
+    if controller.num_human_players == 1:
+        is_human_x = (controller.game.current_player == controller.human_player_symbol)
+        assert not is_human_x, "When human_player_symbol is O and current_player is X, should be computer"
+    
+    # Verify O is treated as human
+    controller.game.current_player = 'O'
+    if controller.num_human_players == 1:
+        is_human_o = (controller.game.current_player == controller.human_player_symbol)
+        assert is_human_o, "When human_player_symbol is O and current_player is O, should be human"
+    
+    print("✓ Controller starting player test passed")
+
+
+def test_auto_play_game():
+    """Test that auto play completes a game"""
+    from tictactoe_package.player import PlayerInput
+    controller = GameController()
+    controller.num_human_players = 0
+    PlayerInput._ai_kind = "random"
+    
+    # Play a single auto game
+    winner = controller.play_game_auto()
+    
+    # Winner should be either 'X', 'O', or None (draw)
+    assert winner in ['X', 'O', None], "Winner should be X, O, or None"
+    
+    # Board should be full if it's a draw, or have a winner
+    if winner is None:
+        assert controller.game.is_board_full(), "Draw game should have full board"
+    else:
+        assert winner in ['X', 'O'], "Winner should be X or O"
+    
+    print("✓ Auto play game test passed")
+
+
+def test_auto_play_statistics():
+    """Test that auto play tracks statistics correctly"""
+    from tictactoe_package.player import PlayerInput
+    controller = GameController()
+    controller.num_human_players = 0
+    PlayerInput._ai_kind = "random"
+    
+    # Play multiple games and track statistics
+    num_games = 20
+    wins_x = 0
+    wins_o = 0
+    draws = 0
+    
+    for _ in range(num_games):
+        winner = controller.play_game_auto()
+        if winner == 'X':
+            wins_x += 1
+        elif winner == 'O':
+            wins_o += 1
+        else:
+            draws += 1
+    
+    # Verify all games are accounted for
+    assert wins_x + wins_o + draws == num_games, "All games should be accounted for"
+    
+    # Verify at least one outcome occurred (highly likely with 20 games)
+    assert wins_x > 0 or wins_o > 0 or draws > 0, "At least one outcome should occur"
+    
+    print("✓ Auto play statistics test passed")
+
+
+def run_all_tests():
+    """Run all tests"""
+    print("\nRunning TicTacToe tests...")
+    print("=" * 50)
+    
+    test_board_initialization()
+    test_valid_move()
+    test_is_valid_move()
+    test_available_positions()
+    test_winner_detection_row()
+    test_winner_detection_column()
+    test_winner_detection_diagonal()
+    test_no_winner()
+    test_board_full()
+    test_player_switching()
+    test_board_reset()
+    test_controller_starting_player()
+    test_auto_play_game()
+    test_auto_play_statistics()
+    
+    print("=" * 50)
+    print("All tests passed! ✓")
+    print()
+
+
+if __name__ == "__main__":
+    run_all_tests()

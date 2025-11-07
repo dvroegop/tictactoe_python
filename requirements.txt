@@ -1,0 +1,19 @@
+# === Core ML / RL dependencies (CUDA 12.3, Python 3.10+) ===
+torch==2.4.1+cu123
+torchvision==0.19.1+cu123
+torchaudio==2.4.1+cu123
+--extra-index-url https://download.pytorch.org/whl/cu123
+
+# === Numerical utilities ===
+numpy==1.26.4
+
+# === Optional (recommended for experiments and logging) ===
+matplotlib==3.8.4
+tqdm==4.66.4
+
+# === Testing ===
+pytest==8.2.0
+
+# === Local development mode (optional) ===
+# Uncomment if developing the package locally
+# -e .
