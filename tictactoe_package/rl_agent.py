@@ -26,8 +26,10 @@ class RLAgent:
 
     def best_action(self, s: State, legal: List[int]) -> Action:
         # Pick the legal action with highest Q, break ties randomly for clarity
-        best = max(legal, key=lambda a: self.value(s, a))
-        return best
+        best_q = max(self.value(s,a) for a in legal)
+        best_moves = [a for a in legal if self.value(s,a) == best_q]
+        return random.choice(best_moves)
+        
 
     def choose_action(self, s: State, legal: List[int], explore: bool) -> Action:
         if explore and random.random() < self.epsilon:
@@ -45,7 +47,7 @@ class RLAgent:
         """
         Train by having the agent play both X and O.
         Reward shaping:
-          +1 for a win, -1 for a loss, 0 for a draw, small -0.01 per move to encourage faster wins.
+          +1 for a win, -1 for a loss, 0 for a draw, small -0.01 per move to encourage faster wins.          
         """
         for ep in range(1, episodes + 1):
             env = TicTacToe()
@@ -63,13 +65,13 @@ class RLAgent:
                 winner = env.check_winner()
                 if winner or env.is_board_full():
                     # Episode ends
-                    result_reward = 0.0
-                    if winner == 'X':
-                        result_reward = +1.0
-                    elif winner == 'O':
-                        result_reward = +1.0
-                    else:
-                        result_reward = 0.0  # draw
+                    # result_reward = 0.0
+                    # if winner == 'X':
+                    #     result_reward = +1.0
+                    # elif winner == 'O':
+                    #     result_reward = +1.0
+                    # else:
+                    #     result_reward = 0.2  # draw
 
                     # Assign results from the perspective of each mover:
                     # If the mover's symbol == winner -> +1, else if opponent won -> -1, else 0.

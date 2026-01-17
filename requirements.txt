@@ -1,8 +1,8 @@
-# === Core ML / RL dependencies (CUDA 12.3, Python 3.10+) ===
-torch==2.4.1+cu123
-torchvision==0.19.1+cu123
-torchaudio==2.4.1+cu123
---extra-index-url https://download.pytorch.org/whl/cu123
+# === Core ML / RL dependencies (CUDA 12.8, Python 3.10+) ===
+torch
+torchvision
+torchaudio
+--extra-index-url https://download.pytorch.org/whl/cu128
 
 # === Numerical utilities ===
 numpy==1.26.4

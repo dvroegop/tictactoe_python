@@ -2,6 +2,8 @@
 from tictactoe_package.dqn_agent import DQNAgent, DQNConfig, encode_board, legal_mask
 from tictactoe_package.game import TicTacToe  # your existing environment
 import random
+import  time #Needed for benchmarking
+
 
 # ----- Constants -----
 
@@ -168,4 +170,13 @@ def train(episodes=30000):
     print("Saved DQN policy -> dqn_policy.pt")
 
 if __name__ == "__main__":
+    print("Starting DQN training...")
+# Start a timer    
+    start_time = time.time()
+
     train(episodes=30000)
+# End timer and display duration in seconds (formatted in MM:SS)
+    end_time = time.time()
+    duration = end_time - start_time
+    minutes, seconds = divmod(duration, 60)
+    print(f"Training completed in {int(minutes):02d}:{int(seconds):02d}")
