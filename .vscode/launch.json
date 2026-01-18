@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run TicTacToe",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}\\tictactoe.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+      // If needed, select your interpreter in the Python extension or set:
+      // "python.defaultInterpreterPath": "c:\\path\\to\\venv\\Scripts\\python.exe" in settings.json
+    },
+    {
+      "name": "Train RL TicTacToe",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}\\train_rl.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+      // If needed, select your interpreter in the Python extension or set:
+      // "python.defaultInterpreterPath": "c:\\path\\to\\venv\\Scripts\\python.exe" in settings.json
+    }
+
+  ]
+}
